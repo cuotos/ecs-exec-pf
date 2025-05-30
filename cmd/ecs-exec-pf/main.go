@@ -17,7 +17,10 @@ func init() {
 // main is the entry point for the ecs-exec-pf command-line tool.
 // It parses arguments, loads AWS config, retrieves the container ID, and starts the ECS Exec session.
 func main() {
-	opts := parseArgs()
+	opts, err := parseArgs()
+	if err != nil {
+		log.Fatalf("failed to parse args: %s", err)
+	}
 
 	cfg, err := config.LoadDefaultConfig(context.Background())
 	if err != nil {
