@@ -23,7 +23,11 @@ func StartSession(ctx context.Context, cluster string, taskId string, containerI
 	}
 
 	if debug {
-		fmt.Println(strings.Join(cmdWithArgs, " "))
+		// extract the parameters element so we can surround them in quotes when printed in the terminal
+		params := cmdWithArgs[len(cmdWithArgs)-1]
+		everythingExceptParams := strings.Join(cmdWithArgs[:len(cmdWithArgs)-1], " ")
+
+		fmt.Printf("%s '%s'\n", everythingExceptParams, params)
 		return nil
 	}
 	return runCommand(ctx, cmdWithArgs)
