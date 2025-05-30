@@ -11,7 +11,7 @@ import (
 	"sync"
 )
 
-func StartSession(ctx context.Context, cluster string, taskId string, containerId string, port uint16, localPort uint16, debug bool) error {
+func StartSession(ctx context.Context, cluster string, taskId string, containerId string, port int, localPort int, debug bool) error {
 	target := fmt.Sprintf("ecs:%s_%s_%s", cluster, taskId, containerId)
 	params := fmt.Sprintf(`{"portNumber":["%d"],"localPortNumber":["%d"]}`, port, localPort)
 
