@@ -6,6 +6,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	ecsexecpf "github.com/cuotos/ecs-exec-pf"
+	"golang.org/x/sync/errgroup"
 )
 
 // init sets the log flags for the application.
@@ -28,8 +29,14 @@ func main() {
 		log.Fatalf("failed to get container ID: %s", err)
 	}
 
-	err = ecsexecpf.StartSession(opts.Cluster, opts.Task, containerId, opts.Port, opts.LocalPort)
-	if err != nil {
+	errGroup, ctx := errgroup.WithContext(context.Background())
+
+	for i := range opts.LocalPort {
+		errGroup.Go(func() error {
+			return ecsexecpf.StartSession(ctx, opts.Cluster, opts.Task, containerId, opts.Port[i], opts.LocalPort[i], opts.Debug)
+		})
+	}
+	if err := errGroup.Wait(); err != nil {
 		log.Fatalf("failed to start session: %s", err)
 	}
 }

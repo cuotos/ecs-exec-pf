@@ -15,8 +15,8 @@ type Options struct {
 	Cluster   string
 	Task      string
 	Container string
-	Port      uint16
-	LocalPort uint16
+	Port      []uint16
+	LocalPort []uint16
 	Debug     bool
 }
 
@@ -36,8 +36,9 @@ func parseArgs() *Options {
 	flaggy.String(&opts.Cluster, "c", "cluster", "ECS cluster name.")
 	flaggy.String(&opts.Task, "t", "task", "ECS task ID.")
 	flaggy.String(&opts.Container, "n", "container", "Container name in ECS task.")
-	flaggy.UInt16(&opts.Port, "p", "port", "Target remote port.")
-	flaggy.UInt16(&opts.LocalPort, "l", "local-port", "Client local port.")
+	flaggy.UInt16Slice(&opts.Port, "p", "port", "Target remote port.")
+	flaggy.UInt16Slice(&opts.LocalPort, "l", "local-port", "Client local port.")
+	flaggy.Bool(&opts.Debug, "d", "debug", "Only print the commands that would be run.")
 	flaggy.Parse()
 
 	if opts.Cluster == "" {
@@ -48,12 +49,16 @@ func parseArgs() *Options {
 		log.Fatal("'--task' is required")
 	}
 
-	if opts.Port == 0 {
+	if len(opts.Port) == 0 {
 		log.Fatal("'--port' is required")
 	}
 
-	if opts.LocalPort == 0 {
+	if len(opts.LocalPort) == 0 {
 		log.Fatal("'--local-port' is required")
+	}
+
+	if len(opts.Port) != len(opts.LocalPort) {
+		log.Fatal("for multiple ports, the local and remote port list should be the same length")
 	}
 
 	return opts
