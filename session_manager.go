@@ -1,15 +1,17 @@
 package ecsexecpf
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"os"
 	"os/exec"
 	"os/signal"
+	"strings"
 	"sync"
 )
 
-func StartSession(cluster string, taskId string, containerId string, port uint16, localPort uint16) error {
+func StartSession(ctx context.Context, cluster string, taskId string, containerId string, port int, localPort int, debug bool) error {
 	target := fmt.Sprintf("ecs:%s_%s_%s", cluster, taskId, containerId)
 	params := fmt.Sprintf(`{"portNumber":["%d"],"localPortNumber":["%d"]}`, port, localPort)
 
@@ -20,11 +22,15 @@ func StartSession(cluster string, taskId string, containerId string, port uint16
 		"--parameters", params,
 	}
 
-	return runCommand(cmdWithArgs)
+	if debug {
+		fmt.Println(strings.Join(cmdWithArgs, " "))
+		return nil
+	}
+	return runCommand(ctx, cmdWithArgs)
 }
 
-func runCommand(cmdWithArgs []string) error {
-	cmd := exec.Command(cmdWithArgs[0], cmdWithArgs[1:]...)
+func runCommand(ctx context.Context, cmdWithArgs []string) error {
+	cmd := exec.CommandContext(ctx, cmdWithArgs[0], cmdWithArgs[1:]...)
 
 	outReader, err := cmd.StdoutPipe()
 
